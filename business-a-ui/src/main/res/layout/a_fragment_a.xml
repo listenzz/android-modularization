@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/to_a_b"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="跳到本模块 B 页面" />
+
+    <Button
+        android:id="@+id/to_b_e"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="跳到 B 模块 E 页面" />
+
+    <Button
+        android:id="@+id/to_b_f"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="跳到 B 模块 F 页面" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:id="@+id/text"
+        />
+
+    <Button
+        android:id="@+id/to_login"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="演示 token 失效跳到登录页面" />
+
+</LinearLayout>

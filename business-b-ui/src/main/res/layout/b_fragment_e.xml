@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/to_b_f"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="跳到本模块 F 页面" />
+
+    <Button
+        android:id="@+id/to_b_g"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="跳到本模块 G 页面" />
+
+</LinearLayout>
