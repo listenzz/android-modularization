@@ -9,7 +9,7 @@ import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 import me.listenzz.businessa.di.AModule;
 import me.listenzz.businessb.di.BModule;
-import me.listenzz.businessc.AccountManagerDelegate;
+import me.listenzz.common_api.AccountManagerDelegate;
 import me.listenzz.commonui.ActivityScope;
 import me.listenzz.commonui.UIComponentFactory;
 import me.listenzz.componentization.AccountManagerDelegateImpl;

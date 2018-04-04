@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import me.listenzz.common_api.Account;
 import me.listenzz.common_api.AccountManager;
+import me.listenzz.common_api.AccountManagerDelegate;
 
 
 public class AccountManagerImpl implements AccountManager {

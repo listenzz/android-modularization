@@ -5,7 +5,7 @@ import android.util.Log;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import me.listenzz.businessc.AccountManagerDelegate;
+import me.listenzz.common_api.AccountManagerDelegate;
 import me.listenzz.navigation.NavigationFragment;
 
 @Singleton
