@@ -17,7 +17,7 @@ An android modularization demo with dagger2
 
 ![](./screenshot/component-dependency.png)
 
-app 主工程需要知道每一个组件，这样才能把它们组装起来。
+app 主工程负责组装组件，它需要知道每一个组件
 
 common-ui 是基础的 UI 组件，它不依赖其它任何组件
 
@@ -49,7 +49,11 @@ UI 组件是指有 UI 的业务组件
 
 本文使用的单 Activity 架构类库是 [AndroidNavigation](https://github.com/listenzz/AndroidNavigation)，它很好地解决了 fragment 嵌套，跳转等 fragment 相关问题，同时解决了状态栏相关问题。
 
-我们在 common-ui 中定义了两个基类 BaseActivity 和 BaseFragment
+先来看看我们都有哪些 UI 组件
+
+![component-ui](./screenshot/component-ui.png)
+
+我们在 common-ui 中定义了两个基类: BaseActivity 和 BaseFragment
 
 ```java
 // common-ui/BaseActivity.java
@@ -86,7 +90,7 @@ public abstract class BaseFragment extends AwesomeFragment {
 }
 ```
 
-同时还定义了一个接口，用于创建跨组件跳转的 Fragment，因为我们是单 Activity 架构，同时为了简单演示，所以这里只演示 Fragment 跳转。但也不排除另外有少量的 Activity，比如 WebViewActivity，它可能运行在另外一个进程以避免某些问题，像这种情况这里就不作演示了。
+同时还定义了一个接口，用于创建跨组件跳转的 Fragment。
 
 ```java
 // common-ui/UIComponentFactory.java
@@ -95,7 +99,9 @@ public interface UIComponentFactory {
 }
 ```
 
-上面我们说到，business-a-ui 和 business-b-ui 彼此之间互不依赖，但如果 business-a-ui 中的页面想要跳到 business-b-ui 中的页面，怎么办呢？让我们从 UI 依赖的角度来看
+> 因为我们是单 Activity 架构，同时为了简单演示，所以这里只演示 Fragment 跳转。实际工程中，即使是单 Activity 架构，除了 MainActivity，也会有少量的 Activity，比如 WebViewActivity，它可能运行在另外一个进程以避免某些问题，像这种情况这里就不作演示了。
+
+**上面我们说到，business-a-ui 和 business-b-ui 彼此之间互不依赖，但如果 business-a-ui 中的页面想要跳到 business-b-ui 中的页面，怎么办呢？**让我们从 UI 依赖的角度来看
 
 ![ui-dependency](./screenshot/ui-dependency.jpg)
 
@@ -236,9 +242,9 @@ public class AFragment extends BaseFragment {
 
 ```
 
-在这个过程中，business-a-ui 不知道 business-b-ui，也根本无法知道 EFragment 是如何实现的，是原生界面？是 RN 界面？总之，除了知道对方遵从 BaseFragment 外，一无所知。
+在这个过程中，business-a-ui 不知道 business-b-ui，也根本无法知道 "E" 对应的是哪个类，是如何实现的，是原生界面？是 RN 界面？总之，除了知道对方遵从 BaseFragment 外，一无所知。
 
-此外也对 UIComponentFactory 是如何实现的一无所知。app 主工程实现了 UIComponentFactory，但 business-a-ui 并不依赖主工程。
+此外 business-a-ui 也对 UIComponentFactory 是如何实现的一无所知。app 主工程实现了 UIComponentFactory，但 business-a-ui 并不依赖主工程。
 
 ### 小结
 
@@ -256,9 +262,9 @@ UI 组件的基类是特殊的接口，它有很多实现，我们通过工厂�
 
 当我们获取一个 UI 模块时，我们得到的是基类的引用
 
-当我们获取一个业务 模块时，我们得到的是一个接口的引用
+当我们获取一个业务模块时，我们得到的是一个接口的引用
 
-**我们面向的都是抽象**
+**实际面向的都是抽象**
 
 
 ![business-dependency](./screenshot/business-dependency.jpg)
@@ -372,26 +378,34 @@ UI组件是指有 UI 的业务组件
 
 有些时候，有些业务组件是没有 UI 的，它们可能运行在后台，当某些事件发生时，可能需要调起 UI 界面以通知用户。有两种方式来处理这种业务组件需要调起 UI 组件的情况。一种是采用订阅／发布机制，具体的实现有 EventBus，LocalBroadcast 等等，另一种是使用代理(delegate)。
 
-下面我们就来演示如何使用代理来实现业务组件调起 UI 组件
+Delegate pattern, 就是遇着这事，我不知道怎么办，于是我找了个代理，将此事委派与他。
 
 来看 PPT
 
 ![business-call-ui](./screenshot/business-call-ui.jpg)
 
-假设 business-c 在登录已经过期无效的情况下，需要通知 UI 层，如何是好呢？
+下面我们就来演示如何使用代理来实现业务组件调起 UI 组件
 
-可以使用 delegate pattern, 就是遇着这事，我不知道怎么办，于是我找了个代理，将此事委派与他。
+**假设 business-c 这个 UI 无关的组件在登录已经过期无效的情况下，需要通知 UI 层，如何是好呢？**
 
-首先定义一个接口
+首先在 common-api 中定义一个接口
 
 ```java
-// business-c/AccountManagerDelegate.java
+// common-api/AccountManagerDelegate.java
 public interface AccountManagerDelegate {
     void onInvalidation();
 }
 ```
 
-声明依赖此接口，并调用其中的方法
+我们来看 common-api 和 business-c 中都有哪些类
+
+
+![component-nonui](./screenshot/component-nonui.png)
+
+
+当 AccountManagerDelegate 和 AccountManager 放在一起时，已经表明了设计意图，有经验的工程师会知道在实现 AccountManager 的过程中，需要依赖 AccountManagerDelegate。
+
+business-c 在实现 AccountManager 时声明依赖 AccountManagerDelegate，并调用其中的方法
 
 ```java
 // business-c/AccountManagerImpl.java
@@ -437,7 +451,7 @@ public class AccountManagerDelegateImpl implements AccountManagerDelegate {
 }
 ```
 
-实际开发中，登录界面不是由 app 主工程亲自实现的，而是由其它 UI 组件实现，主工程在实现这一代理的过程中依赖其它 UI 组件即可。
+> 实际开发中，登录界面不是由 app 主工程亲自实现的，而是由其它 UI 组件实现，主工程在实现这一代理的过程中依赖其它 UI 组件即可。
 
 app 主工程将这一实现和接口绑定
 
@@ -453,9 +467,27 @@ public abstract class AppModule {
 
 就这样，当 AccountManager 的 invalidate 方法被调用时，就会唤起一个 UI 界面，但是在这个过程中业务模块却没有依赖 UI 模块。
 
+## Dagger 帮助
+
+如果某个组件声明了依赖而又没有组装对应的实现，那么是编译不过去的，所以不用担心只有接口没有实现的情况。
+
+如果在使用 dagger 的过程中编译不过去，可以把 MainApplication 中创建 AppComponent 的代码先注释掉，然后再次编译，你会得到正确的提示
+
+```java
+public class MainApplication extends Application implements HasActivityInjector, HasSupportFragmentInjector {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // AppComponent.Builder builder = DaggerAppComponent.builder();
+        // builder.seedInstance(this);
+        // builder.build().inject(this);
+    }
+}
+```
+
 ## 总结
 
-其它组件对于主工程来说，就是积木，主工程负责组装它们。
+主工程负责组装其它组件工程
 
 UI 组件互不依赖，想要跳转，通过工厂方法和模块名创建目标页面实例
 
@@ -472,8 +504,6 @@ UI 组件内部可以有自己独立的业务类和 PO，但不对外公开
 组件内部可以有自己的分层结构，比如某 UI 组件使用 MVVM 模式
 
 [示例项目源码](https://github.com/listenzz/android-modularization)
-
-以上只是调研过程中的产物，未实际应用于生产，请不吝赐教。
 
 
 
